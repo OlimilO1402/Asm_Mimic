@@ -6,3 +6,4 @@ Maybe have a look at the intel manual [i386](http://css.csail.mit.edu/6.858/2013
 
 
 ![IA32InstructionFormat Image](Resources/IA32InstructionFormat.png "IA32InstructionFormat Image")
+![AsmMimic Image](Resources/AsmMimic.png "AsmMimic Image")

@@ -13,26 +13,34 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
-Public eax As r32
-Public ecx As r32
-Public edx As r32
-Public ebx As r32
-Public esp As r32
-Public ebp As r32
-Public esi As r32
-Public edi As r32
+    'Allzweckregister
+    'Abk.                                                       ' Name                ' Spezielle Verwendung
+Public al As reg, ah As reg, ax As reg, eax As reg, eax_ As reg ' Akkumulator         ' niederwertiger Teil und erster Operand bei Multiplikation; Quotient bei Division; BCD-Befehle
+Public cl As reg, ch As reg, cx As reg, ecx As reg, ecx_ As reg ' Zählregister        ' Schleifenzähler für JCXZ und LOOP; Verschiebedistanz von Verschiebebefehlen
+Public dl As reg, dh As reg, dx As reg, edx As reg, edx_ As reg ' Datenregister       ' höherwerter Teil bei Multiplikation; Rest bei Division; Portadresse für die Befehle IN reg,DX und OUT DX,reg
+Public bl As reg, bh As reg, bx As reg, ebx As reg, ebx_ As reg ' Basisregister       ' keine spezielle Verwendung (Das 16-Bit-Register BX konnte im 16-Bit-Modus zur Index-Adressierung benutzt werden; im 32-Bit-Modus ist dies mit allen “General-Purpose”-Registern möglich.)
+
+Public sp As reg, esp As reg                                    ' Stackpointer        ' Zeiger auf die aktuelle Position im Stacksegment; nur eingeschränkt allgemein verwendbar, da dieses Register angibt, wo die Rücksprungadresse von Unterprogrammen und Interrupts gespeichert wird.
+Public bp As reg, ebp As reg, ebp_ As reg                       ' Base Pointer
+Public si As reg, esi As reg, esi_ As reg                       '
+Public di As reg, edi As reg, edi_ As reg
+
+
 
 Private Sub Class_Initialize()
-    Set eax = MNew.r32(er32.eax_)
-    Set ecx = MNew.r32(er32.ecx_)
-    Set edx = MNew.r32(er32.edx_)
-    Set ebx = MNew.r32(er32.ebx_)
-    Set esp = MNew.r32(er32.esp_)
-    Set ebp = MNew.r32(er32.ebp_)
-    Set esi = MNew.r32(er32.esi_)
-    Set edi = MNew.r32(er32.edi_)
-End Sub
 
+    Set al = MNew.reg(EReg.EReg_al): Set ah = MNew.reg(EReg.EReg_ah):   Set ax = MNew.reg(EReg.EReg_ax): Set eax = MNew.reg(EReg.EReg_eax): Set eax_ = MNew.reg(EReg.EReg_eax_)
+    Set cl = MNew.reg(EReg.EReg_cl): Set ch = MNew.reg(EReg.EReg_ch):   Set cx = MNew.reg(EReg.EReg_cx): Set ecx = MNew.reg(EReg.EReg_ecx): Set ecx_ = MNew.reg(EReg.EReg_ecx_)
+    Set dl = MNew.reg(EReg.EReg_dl): Set dh = MNew.reg(EReg.EReg_dh):   Set dx = MNew.reg(EReg.EReg_dx): Set edx = MNew.reg(EReg.EReg_edx): Set edx_ = MNew.reg(EReg.EReg_edx_)
+    Set bl = MNew.reg(EReg.EReg_bl): Set bh = MNew.reg(EReg.EReg_bh):   Set bx = MNew.reg(EReg.EReg_bx): Set ebx = MNew.reg(EReg.EReg_ebx): Set ebx_ = MNew.reg(EReg.EReg_ebx_)
+    
+    'Set sp = MNew.reg(EReg.EReg_sp): Set esp = MNew.reg(EReg.EReg_esp): Set esp_ = MNew.reg(EReg.EReg_esp_)
+    Set bp = MNew.reg(EReg.EReg_bp): Set ebp = MNew.reg(EReg.EReg_ebp): Set ebp_ = MNew.reg(EReg.EReg_ebp_)
+    Set si = MNew.reg(EReg.EReg_si): Set esi = MNew.reg(EReg.EReg_esi): Set esi_ = MNew.reg(EReg.EReg_esi_)
+    Set di = MNew.reg(EReg.EReg_di): Set edi = MNew.reg(EReg.EReg_edi): Set edi_ = MNew.reg(EReg.EReg_edi_)
+    
+End Sub
+'
 Public Sub Add(dst_mem_reg, src_imm_mem_reg)
 'page Vol. 2A 3-31
 'Adds the destination operand (first operand) and the source operand (second operand) and then
@@ -46,18 +54,18 @@ Public Sub Add(dst_mem_reg, src_imm_mem_reg)
 'It evaluates the result for both signed and unsigned integer operands and sets the CF and OF flags to indicate a carry (overflow) in the signed or unsigned result, respectively.
 'The SF flag indicates the sign of the signed result.
 'This instruction can be used with a LOCK prefix to allow the instruction to be executed atomically.
-    Dim dstReg As r32
-    Dim srcReg As r32
-    If TypeOf dst_mem_reg Is r32 Then
+    Dim dstReg As reg
+    Dim srcReg As reg
+    If TypeOf dst_mem_reg Is reg Then
         Set dstReg = dst_mem_reg
-        If TypeOf src_imm_mem_reg Is r32 Then
+        If TypeOf src_imm_mem_reg Is reg Then
             Set srcReg = src_imm_mem_reg
             CPU.Register(dstReg) = CPU.Register(dstReg) + CPU.Register(srcReg)
         Else
             CPU.Register(dstReg) = CPU.Register(dstReg) + src_imm_mem_reg
         End If
     Else
-        If TypeOf src_imm_mem_reg Is r32 Then
+        If TypeOf src_imm_mem_reg Is reg Then
             Set srcReg = src_imm_mem_reg
             dst_mem_reg = dst_mem_reg + CPU.Register(srcReg)
         Else
@@ -65,7 +73,7 @@ Public Sub Add(dst_mem_reg, src_imm_mem_reg)
         End If
     End If
 End Sub
-
+'
 Public Sub mov(dst_mem_reg, src_imm_mem_reg)
 'page Vol. 2B 4-35
 'Copies the second operand (source operand) to the first operand (destination operand).
@@ -90,18 +98,18 @@ Public Sub mov(dst_mem_reg, src_imm_mem_reg)
 'tion (MOV ESP, stack-pointer value) before an event can be delivered. See Section 6.8.3, “Masking Exceptions
 'and Interrupts When Switching Stacks,” in Intel® 64 and IA-32 Architectures Software Developer’s Manual,
 'Volume 3A. Intel recommends that software use the LSS instruction to load the SS register and ESP together.
-    Dim dstReg As r32
-    Dim srcReg As r32
-    If TypeOf dst_mem_reg Is r32 Then
+    Dim dstReg As reg
+    Dim srcReg As reg
+    If TypeOf dst_mem_reg Is reg Then
         Set dstReg = dst_mem_reg
-        If TypeOf src_imm_mem_reg Is r32 Then
+        If TypeOf src_imm_mem_reg Is reg Then
             Set srcReg = src_imm_mem_reg
             CPU.Register(dstReg) = MComputer.CPU.Register(srcReg)
         Else
             CPU.Register(dstReg) = src_imm_mem_reg
         End If
     Else
-        If TypeOf src_imm_mem_reg Is r32 Then
+        If TypeOf src_imm_mem_reg Is reg Then
             Set srcReg = src_imm_mem_reg
             dst_mem_reg = MComputer.CPU.Register(srcReg)
         Else
@@ -110,7 +118,7 @@ Public Sub mov(dst_mem_reg, src_imm_mem_reg)
     End If
 
 End Sub
-
+'
 Public Sub Pop(dst_mem_reg)
 'page 4-390 Vol. 2B
 'Loads the value from the top of the stack to the location specified with the destination operand (or explicit opcode)
@@ -155,15 +163,15 @@ Public Sub Pop(dst_mem_reg)
 'In 64-bit mode, using a REX prefix in the form of REX.R permits access to additional registers (R8-R15). When in
 '64-bit mode, POPs using 32-bit operands are not encodable and POPs to DS, ES, SS are not valid. See the
 'summary chart at the beginning of this section for encoding data and limits.
-    Dim dstReg As r32
-    If TypeOf dst_mem_reg Is r32 Then
+    Dim dstReg As reg
+    If TypeOf dst_mem_reg Is reg Then
         Set dstReg = dst_mem_reg
         CPU.Register(dstReg) = Stack.Pop
     Else
         dst_mem_reg = Stack.Pop
     End If
 End Sub
-
+'
 Public Sub Push(src_imm_mem_reg)
 'page Vol. 2B 4-513
 'Decrements the stack pointer and then stores the source operand on the top of the stack. Address and operand
@@ -195,13 +203,13 @@ Public Sub Push(src_imm_mem_reg)
 'double-fault exception encounters a third stack-fault exception, and the logical processor enters shutdown mode.
 'See the discussion of the double-fault exception in Chapter 6 of the Intel® 64 and IA-32 Architectures Software
 'Developer’s Manual, Volume 3A.
-    Dim srcReg As r32
-    If TypeOf src_imm_mem_reg Is r32 Then
+    Dim srcReg As reg
+    If TypeOf src_imm_mem_reg Is reg Then
         Set srcReg = src_imm_mem_reg
         Stack.Push CPU.Register(srcReg)
     Else
         Stack.Push src_imm_mem_reg
     End If
 End Sub
-
-
+'
+'
