@@ -13,9 +13,9 @@ Public dl As reg, dh As reg, dx As reg, edx As reg, edx_ As reg ' Datenregister 
 Public bl As reg, bh As reg, bx As reg, ebx As reg, ebx_ As reg ' Basisregister       ' keine spezielle Verwendung (Das 16-Bit-Register BX konnte im 16-Bit-Modus zur Index-Adressierung benutzt werden; im 32-Bit-Modus ist dies mit allen “General-Purpose”-Registern möglich.)
 
 Public sp As reg, esp As reg                                    ' Stackpointer        ' Zeiger auf die aktuelle Position im Stacksegment; nur eingeschränkt allgemein verwendbar, da dieses Register angibt, wo die Rücksprungadresse von Unterprogrammen und Interrupts gespeichert wird.
-Public bp As reg, ebp As reg, ebp_ As reg
-Public si As reg, esi As reg, esi_ As reg
-Public di As reg, edi As reg, edi_ As reg
+Public bp As reg, ebp As reg, ebp_ As reg                       ' Pointer to data on the stack (in the SS segment)
+Public si As reg, esi As reg, esi_ As reg                       ' Pointer to data in the segment pointed to by the DS register; source pointer for string operations
+Public di As reg, edi As reg, edi_ As reg                       ' Pointer to data (or destination) in the segment pointed to by the ES register; destination pointer for string operations
 
 Private Opcodes As Collection
 
@@ -139,6 +139,9 @@ Public Sub mov(dst_mem_reg, src_imm_mem_reg)
 'tion (MOV ESP, stack-pointer value) before an event can be delivered. See Section 6.8.3, “Masking Exceptions
 'and Interrupts When Switching Stacks,” in Intel® 64 and IA-32 Architectures Software Developer’s Manual,
 'Volume 3A. Intel recommends that software use the LSS instruction to load the SS register and ESP together.
+
+
+
     Dim dstReg As reg
     Dim srcReg As reg
     If TypeOf dst_mem_reg Is reg Then
@@ -157,7 +160,40 @@ Public Sub mov(dst_mem_reg, src_imm_mem_reg)
             dst_mem_reg = src_imm_mem_reg
         End If
     End If
-
+'    mov al, 0h     ;01  'B0 00
+'    mov cl, 1h     ;02  'B1 01
+'    mov dl, 2h     ;03  'B2 02
+'    mov bl, 3h     ;04  'B3 03
+'
+'    mov ah, 4h     ;05  'B4 04
+'    mov ch, 5h     ;06  'B5 05
+'    mov dh, 6h     ;07  'B6 06
+'    mov bh, 7h     ;08  'B7 07
+'
+'    mov ax, 8h     ;09  '66 B8 08 00
+'    mov cx, 9h     ;10  '66 B9 09 00
+'    mov dx, 0Ah    ;11  '66 BA 0A 00
+'    mov bx, 0Bh    ;12  '66 BB 0B 00
+'
+'    mov sp, 0Ch    ;13  '66 BC 0C 00
+'    mov bp, 0Dh    ;14  '66 BD 0D 00
+'    mov si, 0Eh    ;15  '66 BE 0E 00
+'    mov di, 0Fh    ;16  '66 BF 0F 00
+'
+'    ;mov cs, 0Ch    ;17  '66 BC 0C 00 '???
+'    ;mov ds, 0Dh    ;18  '66 BD 0D 00 '???
+'    ;mov es, 0Eh    ;19  '66 BE 0E 00 '???
+'    ;mov ss, 0Fh    ;20  '66 BF 0F 00 '???
+'
+'    mov eax, 10h   ;21  'B8 10 00 00 00
+'    mov ecx, 11h   ;22  'B9 11 00 00 00
+'    mov edx, 12h   ;23  'BA 12 00 00 00
+'    mov ebx, 13h   ;24  'BB 13 00 00 00
+'
+'    mov esp, 14h   ;25  'BC 14 00 00 00
+'    mov ebp, 15h   ;26  'BD 15 00 00 00
+'    mov esi, 16h   ;27  'BE 16 00 00 00
+'    mov edi, 17h   ;28  'BF 17 00 00 00
 End Sub
 
 Public Sub Pop(dst_mem_reg)
