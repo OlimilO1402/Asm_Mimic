@@ -1,5 +1,11 @@
 # Asm_Mimic
 ## A Mockup mimicing Assembler, for creating realtime-Assembler  
+
+[![GitHub](https://img.shields.io/github/license/OlimilO1402/Asm_Mimic?style=plastic)](https://github.com/OlimilO1402/Asm_Mimic/blob/master/LICENSE) 
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/OlimilO1402/Asm_Mimic?style=plastic)](https://github.com/OlimilO1402/Asm_Mimic/releases/latest)
+[![Github All Releases](https://img.shields.io/github/downloads/OlimilO1402/Asm_Mimic/total.svg)](https://github.com/OlimilO1402/Asm_Mimic/releases/download/v0.0.4/Asm_Mimic.zip)
+[![Follow](https://img.shields.io/github/followers/OlimilO1402.svg?style=social&label=Follow&maxAge=2592000)](https://github.com/OlimilO1402/Asm_Mimic/watchers)
+
 Develop Asm-code in your Visual Basic IDE, assembling and calling at run-time as a just-in-time-assembler
 This is a first mockup working as a feasibility study.
 Project started in dec.2020
